@@ -7,8 +7,6 @@ from unittest.mock import patch
 # Alternatively, you can set it in the setUp() method of your TestCase.
 os.environ["KMS_KEY_ID"] = "/myapp/kms-key-id"
 
-# Import the PasswordService class.
-
 
 class TestPasswordService(unittest.TestCase):
 

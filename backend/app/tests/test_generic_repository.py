@@ -4,8 +4,6 @@ from unittest.mock import MagicMock, patch
 
 from sqlalchemy.orm import Session
 
-# Import your CacheModel, GenericRepository, model_to_dict, deserialize_instance.
-# Adjust the module paths as needed.
 from app.utils.cache_util_model import CacheModel
 from app.repositories.generic_repository import GenericRepository, model_to_dict, deserialize_instance
 

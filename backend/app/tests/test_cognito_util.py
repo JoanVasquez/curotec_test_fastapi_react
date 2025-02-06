@@ -2,7 +2,6 @@ import os
 import unittest
 from unittest.mock import patch
 
-# It’s assumed that your code is in a module named cognito_util.py within app/utils.
 import app.utils.cognito_util as cognito_service
 
 
@@ -151,4 +150,4 @@ class TestCognitoService(unittest.TestCase):
         # as a generic Exception with the message "Authentication failed".
         with self.assertRaises(Exception) as context:
             cognito_service.authenticate("user", "password")
-        self.assertIn("Authentication failed", str(context.exception))
+        self.assertIn("Authentication failed", str(context.exception))end

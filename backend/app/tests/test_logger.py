@@ -6,7 +6,6 @@ import unittest
 
 from pythonjsonlogger import jsonlogger
 
-# Import the function to test from your module.
 from app.utils.logger import get_logger
 
 

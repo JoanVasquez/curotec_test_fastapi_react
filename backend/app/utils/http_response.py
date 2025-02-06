@@ -1,5 +1,3 @@
-# core/utils/http_response.py
-
 
 class HttpResponse:
 

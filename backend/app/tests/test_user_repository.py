@@ -2,7 +2,6 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Import the repository and models.
 from app.repositories.user_repository import UserRepository
 from app.models import User
 from app.utils.cache_util_model import CacheModel
