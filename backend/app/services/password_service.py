@@ -1,3 +1,4 @@
+import os
 from app.utils.cognito_util import (complete_password_reset,
                                     initiate_password_reset)
 from app.utils.kms_util import encrypt_password
@@ -14,7 +15,7 @@ class PasswordService:
         Encrypt the given password using KMS and return the encrypted string.
         """
         try:
-            kms_key_id = get_cached_parameter("/myapp/kms-key-id")
+            kms_key_id = get_cached_parameter(os.environ["KMS_KEY_ID"])
             return encrypt_password(new_password, kms_key_id)
         except Exception as error:
             msg = "[PasswordService] Failed to encrypt password: " f"{error}"
