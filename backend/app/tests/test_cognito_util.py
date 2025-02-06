@@ -150,4 +150,4 @@ class TestCognitoService(unittest.TestCase):
         # as a generic Exception with the message "Authentication failed".
         with self.assertRaises(Exception) as context:
             cognito_service.authenticate("user", "password")
-        self.assertIn("Authentication failed", str(context.exception))end
+        self.assertIn("Authentication failed", str(context.exception))
