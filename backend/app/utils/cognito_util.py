@@ -24,7 +24,7 @@ def authenticate(username: str, password: str) -> str:
             get_cached_parameter(CLIENT_ID_SSM_PATH))
 
         logger.info(f"[CognitoService] Authenticating user: {username}")
-        user_pool_id = get_cached_parameter("/myapp/cognito/user-pool-id")
+        user_pool_id = get_cached_parameter(os.environ["COGNITO_USER_POOL_ID"])
         response = cognito_client.admin_initiate_auth(
             UserPoolId=user_pool_id,
             ClientId=CLIENT_ID,

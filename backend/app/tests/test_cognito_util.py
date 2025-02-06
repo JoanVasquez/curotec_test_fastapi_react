@@ -2,19 +2,19 @@ import os
 import unittest
 from unittest.mock import patch
 
-# It’s assumed that your code is in a module named cognito_service.py.
+# It’s assumed that your code is in a module named cognito_util.py within app/utils.
 import app.utils.cognito_util as cognito_service
 
 
 class TestCognitoService(unittest.TestCase):
-
     def setUp(self):
         # Set the required environment variables
         os.environ["COGNITO_CLIENT_ID_SSM_PATH"] = "fake/path"
         os.environ["AWS_REGION"] = "us-east-1"
+        os.environ["COGNITO_USER_POOL_ID"] = "/myapp/cognito/user-pool-id"
         # A mapping for fake SSM parameter values.
-        # Note: the code calls get_cached_parameter twice on the client-id SSM
-        # path, so we return an intermediate value then the final client-id.
+        # Note: the code calls get_cached_parameter twice on the client-id SSM path,
+        # so we return an intermediate value then the final client-id.
         self.fake_ssm_params = {
             "fake/path": "fake-client-id-ssm",
             "fake-client-id-ssm": "fake-client-id",
@@ -23,30 +23,28 @@ class TestCognitoService(unittest.TestCase):
 
     def fake_get_cached_parameter(self, param):
         """
-        A fake get_cached_parameter implementation that simply returns a value
-        from the fake_ssm_params dict or returns the param if not found.
+        A fake get_cached_parameter implementation that returns a value
+        from the fake_ssm_params dict or returns the parameter as-is if not found.
         """
         return self.fake_ssm_params.get(param, param)
 
     @patch("app.utils.cognito_util.cognito_client")
     @patch("app.utils.cognito_util.get_cached_parameter")
-    def test_authenticate_success(self, mock_get_cached_parameter,
-                                  mock_cognito_client):
+    def test_authenticate_success(self, mock_get_cached_parameter, mock_cognito_client):
         # Set our fake SSM parameter retrieval behavior.
         mock_get_cached_parameter.side_effect = self.fake_get_cached_parameter
 
-        # Prepare a fake response from admin_initiate_auth
+        # Prepare a fake response from admin_initiate_auth.
         fake_response = {"AuthenticationResult": {"IdToken": "fake-id-token"}}
         mock_cognito_client.admin_initiate_auth.return_value = fake_response
 
         # Call the function under test.
         token = cognito_service.authenticate("testuser", "testpassword")
 
-        # Assert that the returned token is what we expect.
+        # Assert that the returned token is as expected.
         self.assertEqual(token, "fake-id-token")
 
-        # Verify that admin_initiate_auth was called with the expected
-        # arguments.
+        # Verify that admin_initiate_auth was called with the expected arguments.
         mock_cognito_client.admin_initiate_auth.assert_called_with(
             UserPoolId="fake-user-pool-id",
             ClientId="fake-client-id",
@@ -59,13 +57,13 @@ class TestCognitoService(unittest.TestCase):
 
     @patch("app.utils.cognito_util.cognito_client")
     @patch("app.utils.cognito_util.get_cached_parameter")
-    def test_register_user_success(self, mock_get_cached_parameter,
-                                   mock_cognito_client):
+    def test_register_user_success(self, mock_get_cached_parameter, mock_cognito_client):
+        # Set our fake SSM parameter retrieval behavior.
         mock_get_cached_parameter.side_effect = self.fake_get_cached_parameter
 
         # Call the register_user function.
-        result = cognito_service.register_user("newuser", "newpassword",
-                                               "newuser@example.com")
+        result = cognito_service.register_user(
+            "newuser", "newpassword", "newuser@example.com")
 
         # Assert that the response is as expected.
         self.assertEqual(result, {"message": "User registered successfully"})
@@ -83,8 +81,8 @@ class TestCognitoService(unittest.TestCase):
 
     @patch("app.utils.cognito_util.cognito_client")
     @patch("app.utils.cognito_util.get_cached_parameter")
-    def test_confirm_user_registration_success(self, mock_get_cached_parameter,
-                                               mock_cognito_client):
+    def test_confirm_user_registration_success(self, mock_get_cached_parameter, mock_cognito_client):
+        # Set our fake SSM parameter retrieval behavior.
         mock_get_cached_parameter.side_effect = self.fake_get_cached_parameter
 
         # Call the confirm_user_registration function.
@@ -103,8 +101,8 @@ class TestCognitoService(unittest.TestCase):
 
     @patch("app.utils.cognito_util.cognito_client")
     @patch("app.utils.cognito_util.get_cached_parameter")
-    def test_initiate_password_reset_success(self, mock_get_cached_parameter,
-                                             mock_cognito_client):
+    def test_initiate_password_reset_success(self, mock_get_cached_parameter, mock_cognito_client):
+        # Set our fake SSM parameter retrieval behavior.
         mock_get_cached_parameter.side_effect = self.fake_get_cached_parameter
 
         # Call the initiate_password_reset function.
@@ -113,21 +111,18 @@ class TestCognitoService(unittest.TestCase):
         # Assert that the expected response is returned.
         self.assertEqual(
             result,
-            {
-                "message":
-                "Password reset initiated. "
-                "Check your email for the code."
-            },
+            {"message": "Password reset initiated. Check your email for the code."},
         )
 
         # Verify that forgot_password was called with the correct parameters.
         mock_cognito_client.forgot_password.assert_called_with(
-            ClientId="fake-client-id", Username="resetuser")
+            ClientId="fake-client-id", Username="resetuser"
+        )
 
     @patch("app.utils.cognito_util.cognito_client")
     @patch("app.utils.cognito_util.get_cached_parameter")
-    def test_complete_password_reset_success(self, mock_get_cached_parameter,
-                                             mock_cognito_client):
+    def test_complete_password_reset_success(self, mock_get_cached_parameter, mock_cognito_client):
+        # Set our fake SSM parameter retrieval behavior.
         mock_get_cached_parameter.side_effect = self.fake_get_cached_parameter
 
         # Call the complete_password_reset function.
@@ -137,8 +132,7 @@ class TestCognitoService(unittest.TestCase):
         # Assert that the expected response is returned.
         self.assertEqual(result, {"message": "Password reset successfully"})
 
-        # Verify that confirm_forgot_password was called with the correct
-        # parameters.
+        # Verify that confirm_forgot_password was called with the correct parameters.
         mock_cognito_client.confirm_forgot_password.assert_called_with(
             ClientId="fake-client-id",
             Username="resetuser",
@@ -152,9 +146,9 @@ class TestCognitoService(unittest.TestCase):
         if "COGNITO_CLIENT_ID_SSM_PATH" in os.environ:
             del os.environ["COGNITO_CLIENT_ID_SSM_PATH"]
 
-        # When the environment variable is missing, the function will catch
-        # the ValueError and raise a generic Exception with the message
-        # "Authentication failed".
+        # When the environment variable is missing, the function is expected to
+        # raise a ValueError inside the try block, which is caught and re-raised
+        # as a generic Exception with the message "Authentication failed".
         with self.assertRaises(Exception) as context:
             cognito_service.authenticate("user", "password")
         self.assertIn("Authentication failed", str(context.exception))

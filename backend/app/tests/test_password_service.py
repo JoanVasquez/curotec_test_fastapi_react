@@ -1,13 +1,21 @@
+from app.services.password_service import PasswordService
+import os
 import unittest
 from unittest.mock import patch
 
+# Set the environment variable in the test module so that tests using it work.
+# Alternatively, you can set it in the setUp() method of your TestCase.
+os.environ["KMS_KEY_ID"] = "/myapp/kms-key-id"
+
 # Import the PasswordService class.
-from app.services.password_service import PasswordService
 
 
 class TestPasswordService(unittest.TestCase):
 
     def setUp(self):
+        # Ensure the environment variable is set in the test environment.
+        os.environ["KMS_KEY_ID"] = "/myapp/kms-key-id"
+
         self.service = PasswordService()
         self.username = "testuser"
         self.new_password = "newpass"
@@ -33,11 +41,10 @@ class TestPasswordService(unittest.TestCase):
         # Call the method under test.
         result = self.service.get_password_encrypted(self.new_password)
 
-        # Verify the correct functions were called with the expected
-        # parameters.
+        # Verify the correct functions were called with the expected parameters.
         mock_get_param.assert_called_once_with("/myapp/kms-key-id")
-        mock_encrypt.assert_called_once_with(self.new_password,
-                                             self.kms_key_id)
+        mock_encrypt.assert_called_once_with(
+            self.new_password, self.kms_key_id)
         self.assertEqual(result, self.encrypted_password)
 
     @patch('app.services.password_service.encrypt_password')
@@ -69,8 +76,7 @@ class TestPasswordService(unittest.TestCase):
         """
         # Call the method.
         self.service.initiate_user_password_reset(self.username)
-        # Verify that initiate_password_reset was called with the correct
-        # username.
+        # Verify that initiate_password_reset was called with the correct username.
         mock_initiate.assert_called_once_with(self.username)
         self.assertTrue(mock_logger.info.called)
 
